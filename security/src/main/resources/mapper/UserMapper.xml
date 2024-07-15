@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.techking.portal.security.mapper.UserMapper">
+
+    <resultMap type="com.techking.portal.security.entity.User" id="UserMap">
+        <id property="id" column="ID" jdbcType="BIGINT"/>
+        <result property="username" column="USERNAME" jdbcType="VARCHAR"/>
+        <result property="password" column="PASSWORD" jdbcType="VARCHAR"/>
+        <result property="salt" column="SALT" jdbcType="VARCHAR"/>
+        <result property="name" column="NAME" jdbcType="VARCHAR"/>
+        <result property="gender" column="GENDER" jdbcType="INTEGER"/>
+        <result property="isLock" column="IS_LOCK" jdbcType="INTEGER"/>
+        <result property="isDeleted" column="IS_DELETED" jdbcType="INTEGER"/>
+        <result property="uniqueLock" column="UNIQUE_LOCK" jdbcType="INTEGER"/>
+        <result property="revision" column="REVISION" jdbcType="INTEGER"/>
+        <result property="createdBy" column="CREATED_BY" jdbcType="BIGINT"/>
+        <result property="createdTime" column="CREATED_TIME" jdbcType="TIMESTAMP"/>
+        <result property="updatedBy" column="UPDATED_BY" jdbcType="BIGINT"/>
+        <result property="updatedTime" column="UPDATED_TIME" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="UserColumn">
+        ID,USERNAME,PASSWORD,SALT,NAME,GENDER,IS_LOCK,IS_DELETED,UNIQUE_LOCK,REVISION,CREATED_BY,CREATED_TIME,UPDATED_BY,UPDATED_TIME
+    </sql>
+
+    <select id="selectByUserName" resultMap="UserMap">
+        SELECT
+            <include refid="UserColumn"/>
+        FROM
+            `USER`
+        WHERE
+            IS_DELETED = 0
+          AND UNIQUE_LOCK = 0
+          AND USERNAME = #{username}
+    </select>
+
+    <update id="deleteUser">
+        UPDATE `USER`
+        SET IS_DELETED = 1,
+            UNIQUE_LOCK = ID,
+            UPDATED_BY = #{updatedBy},
+            UPDATED_TIME = #{updatedTime}
+        WHERE
+            ID = #{id}
+          AND IS_DELETED = 0
+    </update>
+
+    <select id="selectUsers" resultMap="UserMap">
+        SELECT a.<include refid="UserColumn"/>
+        FROM `USER` a
+        INNER JOIN (
+        <include refid="baseSelectSQL"/>
+        <choose>
+            <when test="query.pagination.orderBy != null and query.pagination.orderBy != '' and query.pagination.orderType != null and query.pagination.orderType != ''">
+                ORDER BY ${query.pagination.orderBy} ${query.pagination.orderType}
+            </when>
+            <otherwise>
+                ORDER BY ID DESC
+            </otherwise>
+        </choose>
+        LIMIT #{offset},#{pageSize}) b
+        ON a.ID = b.ID
+    </select>
+
+    <select id="selectUserCount" resultType="int">
+        SELECT COUNT(1) FROM (<include refid="baseSelectSQL"/>) a
+    </select>
+
+    <sql id="baseSelectSQL">
+        SELECT
+            ID
+        FROM
+            `USER`
+        <where>
+            <if test="query.username != null and query.username != ''">
+                USERNAME LIKE CONCAT('%', #{query.username}, '%')
+            </if>
+            <if test="query.name != null and query.name != ''">
+                AND `NAME` LIKE CONCAT('%', #{query.name}, '%')
+            </if>
+            AND IS_DELETED = 0
+        </where>
+    </sql>
+
+    <select id="selectById" resultMap="UserMap">
+        SELECT
+        <include refid="UserColumn"/>
+        FROM
+        `USER`
+        WHERE
+        IS_DELETED = 0
+        AND ID = #{id}
+    </select>
+</mapper>
+

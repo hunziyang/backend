@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.techking.portal.security.mapper.UserRoleMapper">
+
+    <resultMap type="com.techking.portal.security.entity.UserRole" id="UserRoleMap">
+        <result property="id" column="ID" jdbcType="INTEGER"/>
+        <result property="userId" column="USER_ID" jdbcType="INTEGER"/>
+        <result property="roleId" column="ROLE_ID" jdbcType="INTEGER"/>
+        <result property="isDeleted" column="IS_DELETED" jdbcType="INTEGER"/>
+        <result property="uniqueLock" column="UNIQUE_LOCK" jdbcType="INTEGER"/>
+        <result property="revision" column="REVISION" jdbcType="INTEGER"/>
+        <result property="createdBy" column="CREATED_BY" jdbcType="INTEGER"/>
+        <result property="createdTime" column="CREATED_TIME" jdbcType="TIMESTAMP"/>
+        <result property="updatedBy" column="UPDATED_BY" jdbcType="INTEGER"/>
+        <result property="updatedTime" column="UPDATED_TIME" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <update id="deleteByUserId">
+        UPDATE USER_ROLE
+        SET IS_DELETED = 1,
+            UNIQUE_LOCK = ID,
+            UPDATED_BY = #{updatedBy},
+            UPDATED_TIME = #{updatedTime}
+        WHERE
+            IS_DELETED = 0
+          AND USER_ID = #{id}
+    </update>
+
+    <update id="deleteByRoleId">
+        UPDATE USER_ROLE
+        SET IS_DELETED = 1,
+            UNIQUE_LOCK = ID,
+            UPDATED_BY = #{updatedBy},
+            UPDATED_TIME = #{updatedTime}
+        WHERE
+            IS_DELETED = 0
+          AND ROLE_ID = #{id}
+    </update>
+
+</mapper>
+

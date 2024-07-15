@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.techking.portal.security.mapper.PermissionMapper">
+
+    <resultMap type="com.techking.portal.security.entity.Permission" id="PermissionMap">
+        <result property="id" column="ID" jdbcType="INTEGER"/>
+        <result property="name" column="NAME" jdbcType="VARCHAR"/>
+        <result property="code" column="CODE" jdbcType="VARCHAR"/>
+        <result property="type" column="TYPE" jdbcType="INTEGER"/>
+        <result property="parentId" column="PARENT_ID" jdbcType="INTEGER"/>
+        <result property="order" column="ORDER" jdbcType="INTEGER"/>
+        <result property="icon" column="ICON" jdbcType="VARCHAR"/>
+        <result property="path" column="PATH" jdbcType="VARCHAR"/>
+        <result property="component" column="COMPONENT" jdbcType="VARCHAR"/>
+        <result property="description" column="DESCRIPTION" jdbcType="VARCHAR"/>
+        <result property="isDeleted" column="IS_DELETED" jdbcType="INTEGER"/>
+        <result property="uniqueLock" column="UNIQUE_LOCK" jdbcType="INTEGER"/>
+        <result property="revision" column="REVISION" jdbcType="INTEGER"/>
+        <result property="createdBy" column="CREATED_BY" jdbcType="INTEGER"/>
+        <result property="createdTime" column="CREATED_TIME" jdbcType="TIMESTAMP"/>
+        <result property="updatedBy" column="UPDATED_BY" jdbcType="INTEGER"/>
+        <result property="updatedTime" column="UPDATED_TIME" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="baseEntity">
+        ID,NAME,CODE,TYPE,PARENT_ID,`ORDER`,ICON,PATH,COMPONENT,DESCRIPTION,IS_DELETED,UNIQUE_LOCK,REVISION,CREATED_BY,CREATED_TIME,UPDATED_BY,UPDATED_TIME
+    </sql>
+
+    <select id="getPermission" resultMap="PermissionMap">
+        SELECT <include refid="baseEntity"/> FROM `PERMISSION`
+        <where>
+            <if test="query.name != null and query.name != ''">
+                `NAME` LIKE CONCAT('%',#{query.name},'%')
+            </if>
+            <if test="query.code != null and query.code != ''">
+                AND `CODE` LIKE CONCAT('%',#{query.code},'%')
+            </if>
+            AND IS_DELETED = 0
+        </where>
+        <choose>
+            <when test="query.pagination.orderBy != null and query.pagination.orderBy != '' and query.pagination.orderType != null and query.pagination.orderType != ''">
+                ORDER BY ${query.pagination.orderBy} ${query.pagination.orderType}
+            </when>
+            <otherwise>
+                ORDER BY ID DESC
+            </otherwise>
+        </choose>
+        LIMIT #{offset},#{pageSize}
+    </select>
+
+    <select id="getPermissionCount" resultType="int">
+        SELECT COUNT(1) FROM `PERMISSION`
+        <where>
+            <if test="query.name != null and query.name != ''">
+                `NAME` LIKE CONCAT('%',#{query.name},'%')
+            </if>
+            <if test="query.code != null and query.code != ''">
+                AND `CODE` LIKE CONCAT('%',#{query.code},'%')
+            </if>
+            AND IS_DELETED = 0
+        </where>
+    </select>
+
+    <select id="getPermissions" resultMap="PermissionMap">
+        SELECT <include refid="baseEntity"/> FROM `PERMISSION` WHERE IS_DELETED = 0
+    </select>
+
+    <select id="getPermissionsByUserId" resultMap="PermissionMap">
+        SELECT DISTINCT
+            p.ID,NAME,CODE,TYPE,PARENT_ID,`ORDER`,ICON,PATH,COMPONENT
+        FROM
+            USER_ROLE ur
+                INNER JOIN ROLE_PERMISSION rp ON ur.ROLE_ID = rp.ROLE_ID
+                INNER JOIN PERMISSION p ON rp.PERMISSION_ID = p.ID
+        WHERE
+            ur.IS_DELETED = 0
+          AND rp.IS_DELETED = 0
+          AND p.IS_DELETED = 0
+          AND ur.USER_ID = #{id}
+    </select>
+
+</mapper>
+

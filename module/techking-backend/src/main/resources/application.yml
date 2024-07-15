@@ -1,0 +1,16 @@
+spring:
+  config.import: core.yml
+  datasource:
+    username: root
+    password: techking123@
+    url: jdbc:mysql://172.20.1.196:3306/backend?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2b8
+  redis:
+    host: 172.20.1.196
+    password: techking123@
+    port: 6379
+    database: 0
+server:
+  port: 8888
+logging:
+  file:
+    path: /usr/local/bin/backend/log
